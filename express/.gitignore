@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+prisma/integration.db
+prisma/integration.db-journal
+prisma/*.db
+prisma/*.db-journal
+logs/
+coverage/
+test-results/
+.env
+.env*.local
+.vercel

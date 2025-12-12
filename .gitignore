@@ -1,0 +1,53 @@
+original/
+nest-bak/
+django-bak/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+
+# Environment files
+.env
+**/.env
+.env.local
+**/.env.local
+.env*.local
+**/.env*.local
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.venv/
+**/.venv/
+venv/
+**/venv/
+
+# Coverage & test artifacts
+coverage/
+**/coverage/
+.coverage
+**/.coverage
+test-results/
+**/test-results/
+
+# Logs
+logs/
+**/logs/
+*.log
+
+# Misc
+.DS_Store
+**/.DS_Store
+.vercel
+**/.vercel
+*.db
+*.db-journal
+*.swp

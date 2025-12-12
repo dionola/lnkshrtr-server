@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pnpm run build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/src/app" }
+  ],
+  "functions": {
+    "src/app.ts": {
+      "maxDuration": 30,
+      "includeFiles": "node_modules/@prisma/client/**,node_modules/@prisma/engines/**,prisma/schema.prisma"
+    }
+  }
+}
