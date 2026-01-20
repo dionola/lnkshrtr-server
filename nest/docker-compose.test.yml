@@ -1,0 +1,24 @@
+services:
+  db:
+    environment:
+      POSTGRES_DB: linkshrtr_test
+
+  app:
+    build:
+      context: .
+      target: test
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:password@db:5432/linkshrtr_test
+      DIRECT_URL: postgresql://postgres:password@db:5432/linkshrtr_test
+      TEST_DATABASE_URL: postgresql://postgres:password@db:5432/linkshrtr_test
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: docker-test-secret-at-least-32-characters
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: "10"
+    ports: []
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
