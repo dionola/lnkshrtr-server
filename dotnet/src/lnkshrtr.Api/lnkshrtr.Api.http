@@ -1,0 +1,6 @@
+@lnkshrtr.Api_HostAddress = http://localhost:3006
+
+GET {{lnkshrtr.Api_HostAddress}}/health
+Accept: application/json
+
+###

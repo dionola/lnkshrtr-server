@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lnkshrtr
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: runner
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:3006
+      DATABASE_URL: postgresql://postgres:password@db:5432/lnkshrtr
+      REDIS_URL: redis:6379
+      REDIS_ENABLED: "true"
+      JWT_SECRET: docker-dev-secret-at-least-32-characters
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: "10"
+    ports:
+      - "3006:3006"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

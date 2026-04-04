@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/lnkshrtr.Api/lnkshrtr.Api.csproj" />
+  <Project Path="src/lnkshrtr.Application/lnkshrtr.Application.csproj" />
+  <Project Path="src/lnkshrtr.Domain/lnkshrtr.Domain.csproj" />
+  <Project Path="src/lnkshrtr.Infrastructure/lnkshrtr.Infrastructure.csproj" />
+  <Project Path="tests/lnkshrtr.Api.Tests/lnkshrtr.Api.Tests.csproj" />
+</Solution>

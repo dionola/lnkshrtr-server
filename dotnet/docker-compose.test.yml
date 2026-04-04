@@ -1,0 +1,21 @@
+services:
+  db:
+    environment:
+      POSTGRES_DB: lnkshrtr_test
+
+  app:
+    build:
+      context: .
+      target: test
+    environment:
+      ASPNETCORE_ENVIRONMENT: Test
+      DATABASE_URL: postgresql://postgres:password@db:5432/lnkshrtr_test
+      TEST_DATABASE_URL: postgresql://postgres:password@db:5432/lnkshrtr_test
+      REDIS_ENABLED: "false"
+      JWT_SECRET: docker-test-secret-at-least-32-characters
+      JWT_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: "10"
+    ports: []
+    depends_on:
+      db:
+        condition: service_healthy
