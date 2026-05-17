@@ -1,0 +1,58 @@
+service: lnkshrtr-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, 'ap-southeast-1'}
+  stage: ${opt:stage, 'prod'}
+  memorySize: 512
+  timeout: 30
+  httpApi:
+    cors:
+      allowedOrigins:
+        - ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/FRONTEND_URL}
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+        - X-Request-Id
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      exposedResponseHeaders:
+        - X-Request-Id
+      allowCredentials: true
+  environment:
+    NODE_ENV: production
+    BCRYPT_ROUNDS: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/BCRYPT_ROUNDS, '10'}
+    DATABASE_URL: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/DATABASE_URL}
+    DIRECT_URL: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/DIRECT_URL}
+    FRONTEND_URL: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/FRONTEND_URL}
+    GOOGLE_CALLBACK_URL: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/GOOGLE_CALLBACK_URL}
+    GOOGLE_CLIENT_ID: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/GOOGLE_CLIENT_ID}
+    GOOGLE_CLIENT_SECRET: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/GOOGLE_CLIENT_SECRET}
+    JWT_SECRET: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/JWT_SECRET}
+    REDIS_ENABLED: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/REDIS_ENABLED, 'false'}
+    REDIS_URL: ${ssm:/dionola/${sls:stage}/lnkshrtr-backend/REDIS_URL, ''}
+  ecr:
+    images:
+      lnkshrtrApi:
+        path: ./
+        file: Dockerfile.lambda
+
+functions:
+  api:
+    image:
+      name: lnkshrtrApi
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY

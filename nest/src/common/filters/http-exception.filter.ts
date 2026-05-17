@@ -1,4 +1,4 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { ZodError } from 'zod';
 
@@ -21,6 +21,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof AppError) {
       const body = exception.getResponse() as { code: string; message: string };
       res.status(exception.getStatus()).json({ error: body });
+      return;
+    }
+
+    if (exception instanceof BadRequestException) {
+      const body = exception.getResponse() as { message?: string | string[] };
+      const message = Array.isArray(body.message) ? body.message[0] : body.message;
+      res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: message ?? 'Validation failed' } });
       return;
     }
 

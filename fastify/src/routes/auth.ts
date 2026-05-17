@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "@fastify/type-provider-zod";
 import { requireAuth } from "../middleware/auth";
 import { loginSchema, signupSchema, authResponseSchema, userResponseSchema } from "../schemas/auth.schemas";
-import { login, signup, me, googleNotConfigured, googleCallback } from "../controllers/auth.controller";
+import { login, signup, me, googleCallback, googleInit } from "../controllers/auth.controller";
 
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   const app = fastify.withTypeProvider<ZodTypeProvider>();
@@ -20,6 +20,6 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     schema: { response: { 200: userResponseSchema } },
   }, me);
 
-  app.get("/google", googleNotConfigured);
+  app.get("/google", googleInit);
   app.get("/google/callback", googleCallback);
 }

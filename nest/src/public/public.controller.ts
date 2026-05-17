@@ -1,10 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { RedisService } from '../database/redis.service';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { AppError } from '../common/filters/http-exception.filter';
+import { GetLinksQueryDto } from '../dto/links.dto';
 import { userResponseSchema } from '../schemas/auth.schemas';
-import { getPublicLinksQuerySchema, linkResponseSchema } from '../schemas/links.schemas';
+import { linkResponseSchema } from '../schemas/links.schemas';
 
 @Controller('public')
 export class PublicController {
@@ -24,8 +24,8 @@ export class PublicController {
   }
 
   @Get(':username/links')
-  async getPublicLinks(@Param('username') username: string, @Query(new ZodValidationPipe(getPublicLinksQuerySchema)) query: unknown) {
-    const { type } = getPublicLinksQuerySchema.parse(query);
+  async getPublicLinks(@Param('username') username: string, @Query() query: GetLinksQueryDto) {
+    const { type } = query;
     const cacheKey = type ? `public:links:${username}:${type}` : `public:links:${username}`;
     const cached = await this.redis.getJson(cacheKey);
     if (cached) return cached;

@@ -6,14 +6,10 @@ import { RedisService } from '../database/redis.service';
 import { env } from '../config/env';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { OptionalAuthGuard } from '../common/guards/optional-auth.guard';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { AppError } from '../common/filters/http-exception.filter';
 import { generateUniqueShortCode } from '../lib/shortCode';
+import { CreateLinkDto, GetLinksQueryDto, UpdateLinkDto, VerifyPasswordDto } from '../dto/links.dto';
 import {
-  createLinkSchema,
-  updateLinkSchema,
-  verifyPasswordSchema,
-  getUserLinksQuerySchema,
   linkResponseSchema,
 } from '../schemas/links.schemas';
 
@@ -27,9 +23,9 @@ export class LinksController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async getUserLinks(@Request() req: any, @Query(new ZodValidationPipe(getUserLinksQuerySchema)) query: unknown) {
+  async getUserLinks(@Request() req: any, @Query() query: GetLinksQueryDto) {
     const userId: string = req.user.id;
-    const { type } = getUserLinksQuerySchema.parse(query);
+    const { type } = query;
 
     const cacheKey = type ? `user:links:${userId}:${type}` : `user:links:${userId}`;
     const cached = await this.redis.getJson(cacheKey);
@@ -47,10 +43,18 @@ export class LinksController {
 
   @Post()
   @UseGuards(OptionalAuthGuard)
-  async createLink(@Request() req: any, @Body(new ZodValidationPipe(createLinkSchema)) body: unknown) {
-    const parsed = createLinkSchema.parse(body);
+  async createLink(@Request() req: any, @Body() body: CreateLinkDto) {
+    const parsed = {
+      ...body,
+      isPublic: body.isPublic ?? true,
+      isPasswordProtected: body.isPasswordProtected ?? false,
+      type: body.type ?? 'link',
+    };
     const userId: string | null = req.user?.id ?? null;
     const shortCode = parsed.customCode ?? (await generateUniqueShortCode(this.prisma));
+    if (parsed.isPasswordProtected && !parsed.password) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Password must be at least 6 characters when protection is enabled');
+    }
     const hashedPassword = parsed.isPasswordProtected && parsed.password
       ? await bcrypt.hash(parsed.password, env.BCRYPT_ROUNDS)
       : null;
@@ -80,8 +84,7 @@ export class LinksController {
 
   @Put(':id')
   @UseGuards(AuthGuard)
-  async updateLink(@Request() req: any, @Param('id') id: string, @Body(new ZodValidationPipe(updateLinkSchema)) body: unknown) {
-    const parsed = updateLinkSchema.parse(body);
+  async updateLink(@Request() req: any, @Param('id') id: string, @Body() parsed: UpdateLinkDto) {
     const userId: string = req.user.id;
     const newPasswordHash = parsed.isPasswordProtected && parsed.password
       ? await bcrypt.hash(parsed.password, env.BCRYPT_ROUNDS)
@@ -148,8 +151,8 @@ export class LinksController {
 
   @Post('code/:shortCode')
   @HttpCode(HttpStatus.OK)
-  async verifyPassword(@Param('shortCode') shortCode: string, @Body(new ZodValidationPipe(verifyPasswordSchema)) body: unknown, @Res() res: Response) {
-    const { password } = verifyPasswordSchema.parse(body);
+  async verifyPassword(@Param('shortCode') shortCode: string, @Body() body: VerifyPasswordDto, @Res() res: Response) {
+    const { password } = body;
     const link = await this.prisma.link.findUnique({
       where: { shortCode },
       select: { password: true, isPasswordProtected: true },

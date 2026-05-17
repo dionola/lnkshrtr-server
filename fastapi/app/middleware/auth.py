@@ -8,7 +8,7 @@ from ..lib.jwt import verify_token
 from ..models import User
 
 security = HTTPBearer(auto_error=False)
-security_required = HTTPBearer(auto_error=True)
+security_required = HTTPBearer(auto_error=False)
 
 
 def _unauthorized(code: str, message: str):
@@ -22,7 +22,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_required),
     db: Session = Depends(get_db),
 ) -> User:
-    if not credentials:
+    if not credentials or credentials.scheme.lower() != 'bearer':
         _unauthorized('UNAUTHORIZED', 'Authentication required')
     try:
         payload = verify_token(credentials.credentials)
@@ -40,7 +40,7 @@ async def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db),
 ) -> User | None:
-    if not credentials:
+    if not credentials or credentials.scheme.lower() != 'bearer':
         return None
     try:
         payload = verify_token(credentials.credentials)

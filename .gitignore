@@ -2,6 +2,9 @@ original/
 nest-bak/
 django-bak/
 
+.ignore/
+.archive/
+
 # Dependencies
 node_modules/
 **/node_modules/
@@ -11,6 +14,10 @@ dist/
 **/dist/
 build/
 **/build/
+bin/
+**/bin/
+obj/
+**/obj/
 
 # Environment files
 .env

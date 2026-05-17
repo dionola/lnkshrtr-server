@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 50
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_TIMEOUT: int = 5
+    THROTTLE_LIMIT: int = 500
 
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
